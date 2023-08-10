@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:chat_app/screens/auth.dart';
 
 void main() {
   runApp(const App());
@@ -16,7 +19,9 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 63, 17, 177),
         ),
+        textTheme: GoogleFonts.latoTextTheme(),
       ),
+      home: const AuthScreen(),
     );
   }
 }
