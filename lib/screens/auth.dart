@@ -8,7 +8,21 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final form = GlobalKey<FormState>();
+
   var _isLogin = true;
+  var _enteredEmail = '';
+  var _enteredPassword = '';
+
+  void _submit() {
+    final isValid = form.currentState!.validate();
+
+    if (isValid) {
+      form.currentState!.save();
+      print(_enteredEmail);
+      print(_enteredPassword);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +35,15 @@ class _AuthScreenState extends State<AuthScreen> {
         prefixIcon: const Icon(Icons.key),
       ),
       obscureText: true,
+      validator: (value) {
+        if (value == null || value.isEmpty || value.length < 6) {
+          return 'Password must have a length of 6.';
+        }
+        return null;
+      },
+      onSaved: (newValue) {
+        _enteredPassword = newValue!;
+      },
     );
 
     if (!_isLogin) {
@@ -35,6 +58,15 @@ class _AuthScreenState extends State<AuthScreen> {
               prefixIcon: const Icon(Icons.key),
             ),
             obscureText: true,
+            validator: (value) {
+              if (value == null || value.isEmpty || value.length < 6) {
+                return 'Password must have a length of 6.';
+              }
+              return null;
+            },
+            onSaved: (newValue) {
+              _enteredPassword = newValue!;
+            },
           ),
           const SizedBox(height: 20),
           TextFormField(
@@ -46,6 +78,14 @@ class _AuthScreenState extends State<AuthScreen> {
               prefixIcon: const Icon(Icons.key),
             ),
             obscureText: true,
+            validator: (value) {
+              if (value == null ||
+                  value.trim().isEmpty ||
+                  value != _enteredPassword) {
+                return 'Confirm password must match with entered password';
+              }
+              return null;
+            },
           ),
         ],
       );
@@ -80,6 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Form(
+                    key: form,
                     child: Column(
                       children: [
                         TextFormField(
@@ -93,12 +134,23 @@ class _AuthScreenState extends State<AuthScreen> {
                           autocorrect: false,
                           keyboardType: TextInputType.emailAddress,
                           textCapitalization: TextCapitalization.none,
+                          validator: (value) {
+                            if (value == null ||
+                                value.trim().isEmpty ||
+                                !value.contains('@')) {
+                              return 'please enter a valid email address.';
+                            }
+                            return null;
+                          },
+                          onSaved: (newValue) {
+                            _enteredEmail = newValue!;
+                          },
                         ),
                         const SizedBox(height: 20),
                         passwordBoxPreview,
                         const SizedBox(height: 30),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: _submit,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               vertical: 15,
@@ -139,7 +191,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
