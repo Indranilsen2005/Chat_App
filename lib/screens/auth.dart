@@ -12,6 +12,45 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget passwordBoxPreview = TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Password',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        prefixIcon: const Icon(Icons.key),
+      ),
+      obscureText: true,
+    );
+
+    if (!_isLogin) {
+      passwordBoxPreview = Column(
+        children: [
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: 'Password',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              prefixIcon: const Icon(Icons.key),
+            ),
+            obscureText: true,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              prefixIcon: const Icon(Icons.key),
+            ),
+            obscureText: true,
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: Center(
@@ -44,19 +83,19 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Column(
                       children: [
                         TextFormField(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Email Address',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            prefixIcon: const Icon(Icons.email),
                           ),
                           autocorrect: false,
                           keyboardType: TextInputType.emailAddress,
                           textCapitalization: TextCapitalization.none,
                         ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                          ),
-                          obscureText: true,
-                        ),
+                        const SizedBox(height: 20),
+                        passwordBoxPreview,
                         const SizedBox(height: 30),
                         ElevatedButton(
                           onPressed: () {},
@@ -95,7 +134,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
