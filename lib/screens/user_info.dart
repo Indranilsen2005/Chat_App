@@ -1,10 +1,17 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UserInfoScreen extends StatefulWidget {
-  const UserInfoScreen({super.key});
+  const UserInfoScreen({
+    super.key,
+    required this.userCredentials,
+  });
+
+  final UserCredential userCredentials;
 
   @override
   State<UserInfoScreen> createState() => UserInfoScreenState();
@@ -39,6 +46,29 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     });
   }
 
+  void _submit() {
+    if (_userPickedImage == null) {
+      return;
+    }
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_images')
+          .child('${widget.userCredentials.user!.uid}.jpeg');
+
+      storageRef.putFile(_userPickedImage!);
+      final imageUrl = storageRef.getDownloadURL();
+    } catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong! Please try again later.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,11 +81,10 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                 vertical: 50,
                 horizontal: 20,
               ),
-              height: 400,
+              height: 450,
               width: 300,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
                     'Set Profile Picture',
@@ -65,7 +94,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  // const SizedBox(height: 25),
+                  const SizedBox(height: 30),
                   CircleAvatar(
                     radius: 90,
                     backgroundColor: Colors.grey,
@@ -73,6 +102,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                         ? FileImage(_userPickedImage!)
                         : null,
                   ),
+                  const SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -97,6 +127,22 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 60),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 80,
+                      ),
+                      backgroundColor: const Color.fromARGB(255, 89, 12, 176),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text(
+                      'Save & Continue',
+                      style: TextStyle(fontSize: 15),
+                    ),
                   ),
                 ],
               ),

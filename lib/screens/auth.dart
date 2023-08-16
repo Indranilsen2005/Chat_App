@@ -33,12 +33,14 @@ class _AuthScreenState extends State<AuthScreen> {
         await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
       } else {
-        await _firebase.createUserWithEmailAndPassword(
+        final userCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              return const UserInfoScreen();
+              return UserInfoScreen(
+                userCredentials: userCredentials,
+              );
             },
           ),
         );
