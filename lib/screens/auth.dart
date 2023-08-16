@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:chat_app/screens/user_info.dart';
+
 final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
@@ -33,6 +35,13 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) {
+              return const UserInfoScreen();
+            },
+          ),
+        );
       }
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
