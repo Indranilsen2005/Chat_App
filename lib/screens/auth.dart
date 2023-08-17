@@ -45,6 +45,7 @@ class _AuthScreenState extends State<AuthScreen> {
             builder: (context) {
               return UserInfoScreen(
                 userCredentials: userCredentials,
+                userEmail: _enteredEmail,
               );
             },
           ),

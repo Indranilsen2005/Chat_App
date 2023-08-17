@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -11,20 +12,29 @@ class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({
     super.key,
     required this.userCredentials,
+    required this.userEmail,
   });
 
   final UserCredential userCredentials;
+  final String userEmail;
 
   @override
   State<UserInfoScreen> createState() => UserInfoScreenState();
 }
 
 class UserInfoScreenState extends State<UserInfoScreen> {
+  final _form = GlobalKey<FormState>();
+
   File? _userPickedImage;
+  var _isUploading = false;
+  var _username = '';
+  String? _imageUrl;
 
   void _submitImageFromCamera() async {
-    final cameraPickedImage =
-        await ImagePicker().pickImage(source: ImageSource.camera);
+    final cameraPickedImage = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 50,
+    );
 
     if (cameraPickedImage == null) {
       return;
@@ -36,8 +46,10 @@ class UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   void _submitImageFromGallery() async {
-    final galleryPickedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final galleryPickedImage = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
 
     if (galleryPickedImage == null) {
       return;
@@ -48,54 +60,79 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     });
   }
 
-  void _submit() async {
-    if (_userPickedImage == null) {
+  void _saveAndContinue() async {
+    if (!_form.currentState!.validate()) {
+      setState(() {
+        _isUploading = false;
+      });
       return;
     }
+    _form.currentState!.save();
 
-    try {
+    setState(() {
+      _isUploading = true;
+    });
+
+    if (_userPickedImage != null) {
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('user_images')
           .child('${widget.userCredentials.user!.uid}.jpeg');
 
       await storageRef.putFile(_userPickedImage!);
-      final imageUrl = await storageRef.getDownloadURL();
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => const ChatScreen(),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Something went wrong! Please check your internet connection and try again later.',
-          ),
-        ),
-      );
+      _imageUrl = await storageRef.getDownloadURL();
     }
+
+    final firestoreData = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userCredentials.user!.uid);
+    await firestoreData.set({
+      'username': _username,
+      'email': widget.userEmail,
+      'image_url': _userPickedImage != null ? _imageUrl : null,
+    });
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const ChatScreen(),
+      ),
+      (Route<dynamic> route) => false,
+    );
+
+    setState(() {
+      _isUploading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget profilePicture = const CircleAvatar(
+      radius: 90,
+      backgroundColor: Colors.grey,
+      backgroundImage: AssetImage('assets/images/profile.jpg'),
+    );
+
+    if (_userPickedImage != null) {
+      profilePicture = CircleAvatar(
+        radius: 90,
+        foregroundImage: FileImage(_userPickedImage!),
+      );
+    }
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
         body: Center(
-          child: SingleChildScrollView(
-            child: Card(
-              child: Container(
-                margin: const EdgeInsets.symmetric(
-                  vertical: 50,
-                  horizontal: 20,
-                ),
-                height: 450,
-                width: 300,
+          child: Card(
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                vertical: 50,
+                horizontal: 20,
+              ),
+              height: 550,
+              width: 300,
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -108,13 +145,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    CircleAvatar(
-                      radius: 90,
-                      backgroundColor: Colors.grey,
-                      foregroundImage: _userPickedImage != null
-                          ? FileImage(_userPickedImage!)
-                          : null,
-                    ),
+                    profilePicture,
                     const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -141,24 +172,46 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 60),
-                    ElevatedButton(
-                      onPressed: () {
-                        const ChatScreen();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                          horizontal: 80,
+                    const SizedBox(height: 30),
+                    Form(
+                      key: _form,
+                      child: TextFormField(
+                        validator: (value) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              int.tryParse(value) != null) {
+                            return 'Please enter a valid username.';
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          labelText: 'Username',
                         ),
-                        backgroundColor: const Color.fromARGB(255, 89, 12, 176),
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text(
-                        'Save & Continue',
-                        style: TextStyle(fontSize: 15),
+                        maxLength: 50,
+                        onSaved: (newValue) {
+                          _username = newValue!;
+                        },
                       ),
                     ),
+                    const SizedBox(height: 60),
+                    if (_isUploading) const CircularProgressIndicator(),
+                    if (!_isUploading)
+                      ElevatedButton(
+                        onPressed: _saveAndContinue,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 80,
+                          ),
+                          backgroundColor:
+                              const Color.fromARGB(255, 89, 12, 176),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text(
+                          'Save & Continue',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
                   ],
                 ),
               ),
