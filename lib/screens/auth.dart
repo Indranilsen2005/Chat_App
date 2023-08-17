@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:chat_app/screens/user_info.dart';
+import 'package:chat_app/screens/chat.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -15,6 +16,12 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _form = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   var _isLogin = true;
   var _enteredEmail = '';
@@ -37,6 +44,12 @@ class _AuthScreenState extends State<AuthScreen> {
       if (_isLogin) {
         await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const ChatScreen(),
+          ),
+          (Route<dynamic> route) => false,
+        );
       } else {
         final userCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
