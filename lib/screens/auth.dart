@@ -164,7 +164,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Image.asset('assets/images/chat.png'),
               ),
               Text(
-                'Welcome to Chat App',
+                'Welcome to ChatOn',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 30,
@@ -219,7 +219,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 horizontal: 100,
                               ),
                               backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
+                                  const Color.fromARGB(255, 89, 12, 176),
                               foregroundColor: Colors.white,
                             ),
                             child: Text(_isLogin ? 'Login' : 'Sign Up'),
