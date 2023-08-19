@@ -61,7 +61,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   void _saveAndContinue() async {
-    if (!_form.currentState!.validate()) {
+    if (_userPickedImage == null || !_form.currentState!.validate()) {
       setState(() {
         _isUploading = false;
       });
