@@ -203,8 +203,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                             vertical: 15,
                             horizontal: 80,
                           ),
-                          backgroundColor:
-                              const Color.fromARGB(255, 89, 12, 176),
+                          backgroundColor: Color.fromARGB(255, 12, 18, 188),
                           foregroundColor: Colors.white,
                         ),
                         child: const Text(

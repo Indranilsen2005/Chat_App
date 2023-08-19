@@ -166,7 +166,7 @@ class _AuthScreenState extends State<AuthScreen> {
               Text(
                 'Welcome to ChatOn',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.8),
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
                 ),
@@ -218,8 +218,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 vertical: 15,
                                 horizontal: 100,
                               ),
-                              backgroundColor:
-                                  const Color.fromARGB(255, 89, 12, 176),
+                              backgroundColor: Color.fromARGB(255, 12, 18, 188),
                               foregroundColor: Colors.white,
                             ),
                             child: Text(_isLogin ? 'Login' : 'Sign Up'),

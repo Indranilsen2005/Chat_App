@@ -1,9 +1,9 @@
-import 'package:chat_app/widgets/chat_list.dart';
-import 'package:chat_app/widgets/new_message.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:chat_app/screens/auth.dart';
+import 'package:chat_app/widgets/chat_list.dart';
+import 'package:chat_app/screens/users_list.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -45,14 +45,32 @@ class ChatScreen extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: IconButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const UsersListScreen(),
+            ),
+          );
+        },
+        iconSize: 23,
+        padding: const EdgeInsets.all(20),
+        icon: Icon(Icons.message_rounded),
+        color: Colors.white,
+        style: IconButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+      ),
       body: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+        padding: EdgeInsets.only(bottom: 20),
         child: Column(
           children: [
             Expanded(
               child: ChatList(),
             ),
-            NewMessage(),
           ],
         ),
       ),
