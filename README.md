@@ -1,4 +1,4 @@
-# chat_app
+# ChatOn
 
 A new Flutter project.
 
